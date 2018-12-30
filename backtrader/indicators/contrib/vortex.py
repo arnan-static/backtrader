@@ -52,5 +52,5 @@ class Vortex(bt.Indicator):
 
         tr = bt.ind.SumN(bt.Max(h0l0, h0c1, l0c1), period=self.p.period)
 
-        self.l.vi_plus = vm_plus / tr
-        self.l.vi_minus = vm_minus / tr
+        self.l.vi_plus = bt.DivZeroByZero(vm_plus, tr, 0, 0) # arnan
+        self.l.vi_minus = bt.DivZeroByZero(vm_minus, tr, 0, 0) # arnan
