@@ -246,6 +246,7 @@ class BackBroker(bt.BrokerBase):
         ('shortcash', True),
         ('fundstartval', 100.0),
         ('fundmode', False),
+        ('deviation', 0.0001) #arnan
     )
 
     def __init__(self):
@@ -917,7 +918,7 @@ class BackBroker(bt.BrokerBase):
 
     def _try_exec_stop(self, order, popen, phigh, plow, pcreated, pclose):
         if order.isbuy():
-            if popen >= pcreated:
+            if popen >= pcreated and popen < pcreated + self.p.deviation: #arnan
                 # price penetrated with an open gap - use open
                 p = self._slip_up(phigh, popen, doslip=self.p.slip_open)
                 self._execute(order, ago=0, price=p)
@@ -927,7 +928,7 @@ class BackBroker(bt.BrokerBase):
                 self._execute(order, ago=0, price=p)
 
         else:  # Sell
-            if popen <= pcreated:
+            if popen <= pcreated and popen > pcreated - self.p.deviation: #arnan
                 # price penetrated with an open gap - use open
                 p = self._slip_down(plow, popen, doslip=self.p.slip_open)
                 self._execute(order, ago=0, price=p)
