@@ -156,7 +156,9 @@ class Trade(object):
         )
 
     def __init__(self, data=None, tradeid=0, historyon=False,
-                 size=0, price=0.0, value=0.0, commission=0.0):
+                 size=0, price=0.0, value=0.0, commission=0.0, R=None):
+                 # ROR - Richard O'Regan added above..
+                 # add param R=None above. Incorporate R-Multiple feature..
 
         self.ref = next(self.refbasis)
         self.data = data
@@ -165,6 +167,7 @@ class Trade(object):
         self.price = price
         self.value = value
         self.commission = commission
+        self.R = R  # ROR - Richard O'Regan added: R-Multiple attribute..
 
         self.pnl = 0.0
         self.pnlcomm = 0.0
@@ -288,10 +291,37 @@ class Trade(object):
             # position reduced/closed
             pnl = comminfo.profitandloss(-size, self.price, price)
 
+            # ROR - Richard O'Regan added: R-Multiple feature
+            if self.R != None:
+                # NOTE: self.price = inital entry price
+                # NOTE: price = exit price
+                if -size < 0:  # If a sell signal that initiated position..
+                    risk = self.R - self.price
+                else:
+                    risk = self.price - self.R
+                try:
+                    pnl = pnl/risk
+                except ZeroDivisionError:
+                    # Give output to user to track division by zero bug..
+                    print('Division by Zero with R-Multiple.\n' +
+                                    'Entry price =' + str(self.price) + '\n' +
+                                    'R Stop =' + str(self.R) + '\n' +
+                                    'Risk =' + str(risk) + '\n' +
+                                    '\nTrade =\n' + str(self) + '\n' +
+                                    '\nOrder =\n' + str(order) + '\n')
+                    raise
+
             self.pnl += pnl
             self.pnlcomm = self.pnl - self.commission
 
         self.value = comminfo.getvaluesize(self.size, self.price)
+        
+        # ROR - Rich O'Regan added.
+        # Note: bastardisation only works in simple trade cases where each trade
+        # has one entry and one exit (fine for all my purposes)..
+        self.entry_price = self.price    # ROR
+        self.exit_price = price    # ROR
+
 
         # Update the history if needed
         if self.historyon:
