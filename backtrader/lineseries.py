@@ -482,6 +482,8 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
         sublabels = self._plotlabel()
         if sublabels:
             for i, sublabel in enumerate(sublabels):
+                if '<lambda>' in str(sublabel):
+                    sublabels[i] = 'lbd'
                 # if isinstance(sublabel, LineSeries): ## DOESN'T WORK ???
                 if hasattr(sublabel, 'plotinfo'):
                     try:
